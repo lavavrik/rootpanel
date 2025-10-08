@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/lavavrik/go-sm/api"
-	"github.com/lavavrik/go-sm/auth"
 	"github.com/lavavrik/go-sm/stats"
 )
 
@@ -101,9 +100,6 @@ func main() {
 	} else {
 		fmt.Println("Stats collection is disabled.")
 	}
-
-	// Test PAM
-	auth.Test()
 
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatal("Server failed to start:", err)

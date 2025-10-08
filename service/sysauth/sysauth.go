@@ -1,4 +1,4 @@
-package auth
+package sysauth
 
 import (
 	"bufio"
@@ -9,10 +9,10 @@ import (
 	"github.com/msteinert/pam"
 )
 
-func Test() bool {
-	pw := []byte("PASSWORD")
+func Validate(username, password string) bool {
+	pw := []byte(password)
 
-	t, err := pam.StartFunc("login", "lavavrik", func(s pam.Style, msg string) (string, error) {
+	t, err := pam.StartFunc("login", username, func(s pam.Style, msg string) (string, error) {
 		switch s {
 		case pam.PromptEchoOff:
 			fmt.Print("1: ", msg)
@@ -38,7 +38,7 @@ func Test() bool {
 	}
 	err = t.Authenticate(0)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "authenticate: %s\n", err.Error())
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
 		return false
 	}
 	fmt.Println("authentication succeeded!")
