@@ -1,0 +1,45 @@
+// Specifies that we are using proto3 syntax.
+syntax = "proto3";
+
+// Defines the Go package where the generated code will live.
+package protobufs;
+
+// Tells the protoc compiler where to output the generated Go file.
+option go_package = "./protobufs";
+
+// Represents CPU load information.
+message CPU {
+  // A list of load values, one for each core.
+  // Protobuf doesn't have a uint16 type, so uint32 is the standard choice.
+  repeated uint32 load = 1;
+}
+
+// Represents memory usage statistics.
+message Memory {
+  uint64 used = 1;
+  uint64 free = 2;
+}
+
+// Represents disk usage and performance statistics for a single disk.
+message Disk {
+  string name = 1;
+  uint64 read_speed = 2;
+  uint64 write_speed = 3;
+}
+
+// Represents combined network usage and performance statistics.
+message Network {
+  uint64 bytes_sent = 1;
+  uint64 bytes_received = 2;
+}
+
+// The main message that aggregates all system metrics into a single data point.
+message DataPoint {
+  uint64 timestamp = 1;
+  CPU cpu = 2;
+  Memory memory = 3;
+  // A list of all disks attached to the system.
+  repeated Disk disks = 4;
+  // Network statistics.
+  Network network = 5;
+}

@@ -1,0 +1,37 @@
+on: [push, pull_request]
+name: Test
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: [1.23.x, 1.24.x]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Update system
+      run: |
+        sudo apt-get update -y
+        sudo apt-get dist-upgrade -y
+    - name: Install PAM with debug symbols
+      run: |
+        sudo apt-get install ubuntu-dbgsym-keyring -y
+        echo "deb http://ddebs.ubuntu.com $(lsb_release -cs) main restricted universe multiverse
+        deb http://ddebs.ubuntu.com $(lsb_release -cs)-updates main restricted universe multiverse
+        deb http://ddebs.ubuntu.com $(lsb_release -cs)-proposed main restricted universe multiverse" | \
+        sudo tee -a /etc/apt/sources.list.d/ddebs.list
+        sudo apt-get update -y
+        sudo apt-get install -y libpam-dev libpam-modules-dbgsym libpam0*-dbgsym
+    - name: Add a test user
+      run: sudo useradd -d /tmp/test -p '$1$Qd8H95T5$RYSZQeoFbEB.gS19zS99A0' -s /bin/false test
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test
+      run: sudo go test -v -cover -coverprofile=coverage.out ./...
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

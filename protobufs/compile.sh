@@ -1,0 +1,1 @@
+npx protoc --proto_path=../protobufs --go_out=../service/protobufs --ts_out=../ui/src/protobufs schema.proto
