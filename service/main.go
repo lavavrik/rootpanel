@@ -9,13 +9,15 @@ import (
 	"time"
 
 	"github.com/lavavrik/go-sm/api"
+	"github.com/lavavrik/go-sm/api/kv"
 	"github.com/lavavrik/go-sm/stats"
 )
 
 // Config represents the application configuration
 type Config struct {
-	Server ServerConfig `json:"server"`
-	Stats  StatsConfig  `json:"stats"`
+	Server ServerConfig   `json:"server"`
+	Stats  StatsConfig    `json:"stats"`
+	ValKey kv.RedisConfig `json:"valkey"`
 }
 
 // ServerConfig represents server-specific configuration
@@ -73,7 +75,7 @@ func main() {
 	log.Printf("Using port from config file: %s", port)
 
 	// Start server
-	addr := ":" + port
+	addr := "127.0.0.1:" + port
 	log.Printf("Starting server on %s", addr)
 	log.Printf("API endpoints:")
 	log.Printf("  GET /        - API documentation")
@@ -83,14 +85,14 @@ func main() {
 	if config.Stats.Enabled {
 		ticker := time.NewTicker(time.Duration(config.Stats.IntervalSeconds) * time.Second)
 
-		fmt.Println("Stats collection is enabled.")
+		log.Println("Stats collection is enabled.")
 		done := make(chan bool)
 		go func() {
 			// 4. Use a for-select loop to wait for ticks or a stop signal.
 			for {
 				select {
 				case <-done:
-					fmt.Println("Goroutine is stopping!")
+					log.Println("Goroutine is stopping!")
 					return
 				case <-ticker.C:
 					stats.WriteDataPoints()
@@ -98,8 +100,17 @@ func main() {
 			}
 		}()
 	} else {
-		fmt.Println("Stats collection is disabled.")
+		log.Println("Stats collection is disabled.")
 	}
+
+	err = kv.Connect(config.ValKey)
+	if err != nil {
+		log.Fatal("Failed to connect to Redis:", err)
+	} else {
+		log.Println("Connected to Redis successfully.")
+	}
+
+	defer kv.Close()
 
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatal("Server failed to start:", err)
