@@ -17,7 +17,7 @@ import (
 type Config struct {
 	Server ServerConfig   `json:"server"`
 	Stats  StatsConfig    `json:"stats"`
-	ValKey kv.RedisConfig `json:"valkey"`
+	Redis  kv.RedisConfig `json:"redis"`
 }
 
 // ServerConfig represents server-specific configuration
@@ -103,9 +103,11 @@ func main() {
 		log.Println("Stats collection is disabled.")
 	}
 
-	err = kv.Connect(config.ValKey)
+	fmt.Println("Redis configuration:", config.Redis)
+
+	err = kv.Connect(config.Redis)
 	if err != nil {
-		log.Fatal("Failed to connect to Redis:", err)
+		log.Fatal("Failed to connect to Redis: ", err)
 	} else {
 		log.Println("Connected to Redis successfully.")
 	}
@@ -113,6 +115,6 @@ func main() {
 	defer kv.Close()
 
 	if err := http.ListenAndServe(addr, nil); err != nil {
-		log.Fatal("Server failed to start:", err)
+		log.Fatal("Server failed to start: ", err)
 	}
 }

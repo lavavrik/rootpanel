@@ -30,6 +30,15 @@ func Connect(config RedisConfig) error {
 		DB:       config.DB,
 	})
 
+	// Test the connection
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := client.Ping(ctx).Result()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

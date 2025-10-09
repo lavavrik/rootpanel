@@ -2,7 +2,7 @@
   "server": {
     "port": "8080"
   },
-  "valkey": {
+  "redis": {
     "address": "localhost:6379",
     "password": "",
     "db": 0
